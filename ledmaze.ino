@@ -10,13 +10,15 @@ uint32_t last_draw_millis, last_move_millis;
 
 
 // simple square map
-const int MAP_MIN_X = -20;
+const int MAP_MIN_X = 0;
 const int MAP_MAX_X = 20;
-const int MAP_MIN_Y = -20;
+const int MAP_MIN_Y = 0;
 const int MAP_MAX_Y = 20;
+int map_objects[MAP_MAX_X][MAP_MAX_Y] = {0};
 
 // player characteristics
 const int PLAYER_SIZE = 2;
+int player_color;
 
 // calculate derived player vars
 const int PLAYER_OFFSET_X = LED_ROWS/2-PLAYER_SIZE/2;
@@ -27,10 +29,15 @@ const float MOVE_LIMIT_0 = 0.7;   // tilt less than this threshold is ignored
 const float MOVE_LIMIT_1 = 3.0;   // tilt less than this threshold = move 1 @ 5KHz
                                   // tilt more than this threshold = move 1 @ 10KHz
 
+// map objects
+const int OBJ_HEART = 1;
+
 void setup()
 {
     badge.begin();
     badge.matrix.setBrightness(100);
+    player_color = 0xaaaaaa;
+    map_objects[7][8] = OBJ_HEART;
 }
 
 float ax, ay, az;
@@ -120,6 +127,17 @@ void loop()
       Serial.print(posy);
       Serial.println("");
     }
+    // check for object collisions
+    for(int i=0; i<PLAYER_SIZE; i++) {
+      for(int j=0; j<PLAYER_SIZE; j++) {
+        int obj = map_objects[posx+i][posy+j];
+        if(obj != 0) {
+          if(obj == OBJ_HEART) {
+            player_color = 0xddaaaa;
+          }
+        }
+      }
+    }
   }
 
   for(int drawx = 0; drawx < LED_COLS; drawx++) {
@@ -127,7 +145,7 @@ void loop()
       // draw the "player" marker
       if(drawx >= PLAYER_OFFSET_X && drawx < PLAYER_OFFSET_X+PLAYER_SIZE && 
          drawy >= PLAYER_OFFSET_Y && drawy < PLAYER_OFFSET_Y+PLAYER_SIZE) {
-        badge.matrix.set(drawx, drawy, 0xaaaaaa);
+        badge.matrix.set(drawx, drawy, player_color);
       } else {
         int mapx = posx - PLAYER_OFFSET_X + drawx;
         int mapy = posy - PLAYER_OFFSET_Y + drawy;
@@ -139,8 +157,15 @@ void loop()
           // bg default color is black
           color = 0;
           // draw map edge
-          if(mapx == MAP_MAX_X || mapx == MAP_MIN_X || mapy == MAP_MAX_Y || mapy == MAP_MIN_Y)
+          if(mapx == MAP_MAX_X || mapx == MAP_MIN_X || mapy == MAP_MAX_Y || mapy == MAP_MIN_Y) {
             color = 0x444444;
+          } else {
+            // check for objects on map
+            int obj = map_objects[mapx][mapy];
+            if(obj != 0) {
+              if(obj == OBJ_HEART) color = 0x800000;
+            }
+          }
           // if nothing else there, draw background grid
           if(color == 0) {
             if(mapx % 4 == 0) {
