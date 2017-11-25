@@ -77,6 +77,15 @@ void MatrixAnimation::draw(RGBMatrix &matrix)
   frameIndex = (frameIndex + 1)%frameCount;
 };
 
+void MatrixAnimation::play(RGBMatrix &matrix)
+{
+  this->reset();
+  do {
+    this->draw(matrix);
+    delay(this->getFrameDelay());
+  } while(this->getFrameIndex() > 0);
+};
+
 uint16_t MatrixAnimation::getLedCount() const {
   return ledCount;
 }

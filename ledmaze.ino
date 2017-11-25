@@ -2,6 +2,10 @@
  */
 
 #include "Badge.h"
+#include "matrixAnimation.h"
+#include "frame-heart-zoom-in.h"
+#include "frame-key-zoom-in.h"
+#include "frame-monster.h"
 
 Badge badge;
 
@@ -31,6 +35,8 @@ const float MOVE_LIMIT_1 = 3.0;   // tilt less than this threshold = move 1 @ 5K
 
 // map objects
 const int OBJ_HEART = 1;
+const int OBJ_KEY = 2;
+const int OBJ_MONSTER = 3;
 
 void setup()
 {
@@ -38,6 +44,8 @@ void setup()
     badge.matrix.setBrightness(100);
     player_color = 0xaaaaaa;
     map_objects[7][8] = OBJ_HEART;
+    map_objects[12][17] = OBJ_KEY;
+    map_objects[11][3] = OBJ_MONSTER;
 }
 
 float ax, ay, az;
@@ -133,7 +141,17 @@ void loop()
         int obj = map_objects[posx+i][posy+j];
         if(obj != 0) {
           if(obj == OBJ_HEART) {
-            player_color = 0xddaaaa;
+            // draw the heart animation
+            animation_heart_zoom.play(badge.matrix);
+            player_color = 0xff0000;
+          }
+          else if(obj == OBJ_KEY) {
+            keyzoom_animation.play(badge.matrix);
+            player_color = 0xFFFF00;
+          } else if(obj == OBJ_MONSTER) {
+            // show the monster!
+            animation_monster.draw(badge.matrix);
+            delay(1500);
           }
         }
       }
@@ -164,6 +182,8 @@ void loop()
             int obj = map_objects[mapx][mapy];
             if(obj != 0) {
               if(obj == OBJ_HEART) color = 0x800000;
+              else if(obj == OBJ_KEY) color = 0xFFFF00;
+              else if(obj == OBJ_MONSTER) color = 0x00ff00;
             }
           }
           // if nothing else there, draw background grid

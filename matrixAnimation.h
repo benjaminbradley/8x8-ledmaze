@@ -51,6 +51,10 @@ class MatrixAnimation {
   // @param matrix[] LED matrix to draw to.
   void draw(RGBMatrix &matrix);
 
+  // Draw all frames of the animation in sequence
+  // @param matrix[] LED matrix to draw to.
+  void play(RGBMatrix &matrix);
+
   uint16_t getLedCount() const;
   uint16_t getFrameCount() const;
   uint16_t getFrameDelay() const;
